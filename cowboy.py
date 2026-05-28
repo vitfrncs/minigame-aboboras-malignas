@@ -1,0 +1,109 @@
+from config import *
+from bala import Bala
+import pygame
+from transformações import Transformacoes
+
+
+class Cowboy:
+    def __init__(self, x, y):
+        self.inicial_x = float(x)
+        self.inicial_y = float(y)
+        self.reset()
+
+        self.speed = COWBOY_VELOCIDADE
+        self.largura = 40.0
+        self.altura = 60.0
+        self.tempo_stun = 1.5
+
+        # Definição dos vértices locais (Design)
+        self.partes = [
+            (-24, -34, 48, 8, COR_CHAPEU_1),  # aba do chapéu
+            (-14, -46, 28, 14, COR_CHAPEU_2),  # topo do chapéu
+            (-12, -24, 24, 24, COR_PELE),  # cabeça
+            (-8, -16, 4, 8, (40, 40, 80)),  # olhos
+            (4, -16, 4, 8, (40, 40, 80)),
+            (-12, 0, 24, 6, (200, 30, 30)),  # lenço
+            (-16, 6, 32, 34, COR_BLUSA),  # blusa
+            (-12, 40, 10, 16, (70, 40, 20)),  # pernas
+            (2, 40, 10, 16, (70, 40, 20))
+        ]
+
+    def move(self, keys, dt):
+        # stun/dano
+        if self.tomou_dano:
+            self.tempo_dano += dt
+            if self.tempo_dano >= self.tempo_stun:
+                self.tomou_dano = False
+                self.tempo_dano = 0
+                self.escala_x = 1
+                self.escala_y = 1
+
+        # movimentação wasd
+        if keys[pygame.K_w]: self.y -= self.speed * dt
+        if keys[pygame.K_s]: self.y += self.speed * dt
+        if keys[pygame.K_a]: self.x -= self.speed * dt
+        if keys[pygame.K_d]: self.x += self.speed * dt
+
+        # tiro com as teclas das setas
+        atirando = False
+
+        # Verifica qual seta foi pressionada para definir a direção do projétil
+        if keys[pygame.K_UP]:
+            self.shoot_direction = pygame.Vector2(0, -1)
+            atirando = True
+        elif keys[pygame.K_DOWN]:
+            self.shoot_direction = pygame.Vector2(0, 1)
+            atirando = True
+        elif keys[pygame.K_LEFT]:
+            self.shoot_direction = pygame.Vector2(-1, 0)
+            atirando = True
+        elif keys[pygame.K_RIGHT]:
+            self.shoot_direction = pygame.Vector2(1, 0)
+            atirando = True
+
+        # Controle do Cooldown
+        self.shoot_timer += dt
+
+        if atirando and not self.tomou_dano:
+            if self.shoot_timer >= COWBOY_COOLDOWN:
+                self.shoot_timer = 0.0
+                # Adiciona a bala na direção exata da seta pressionada
+                self.balas.append(
+                    Bala(self.x, self.y, self.shoot_direction, "cowboy")
+                )
+
+        # atualização das balas
+        self.balas = [b for b in self.balas if not b.fora_da_tela()]
+
+        for b in self.balas:
+            b.atualizar(dt)
+
+        return self.x, self.y
+
+    def desenhar(self, screen):
+        matriz = Transformacoes.matriz_mundo(self.x, self.y, 0, self.escala_x, self.escala_y)
+
+        for px, py, w, h, cor in self.partes:
+            vertices = [
+                (px, py),
+                (px + w, py),
+                (px + w, py + h),
+                (px, py + h)
+            ]
+            vertices_transformados = Transformacoes.aplicar_transformacoes(vertices, matriz)
+            pygame.draw.polygon(screen, cor, vertices_transformados)
+
+        for b in self.balas:
+            b.desenhar(screen)
+
+    def reset(self):
+        """Princípio do Encapsulamento: o próprio objeto gerencia seu estado inicial"""
+        self.x = self.inicial_x
+        self.y = self.inicial_y
+        self.escala_x = 1.0
+        self.escala_y = 1.0
+        self.shoot_direction = pygame.Vector2(1, 0)
+        self.shoot_timer = 0.0
+        self.balas = []
+        self.tomou_dano = False
+        self.tempo_dano = 0.0
