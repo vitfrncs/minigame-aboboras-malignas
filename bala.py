@@ -9,20 +9,17 @@ class Bala:
     def __init__(self, x, y, direcao: pygame.Vector2, tipo="cowboy"):
 
         self.pos = pygame.Vector2(x, y)
-
         self.dir = direcao.normalize()
 
         self.tipo = tipo
 
-        self.largura = 8
-        self.altura = 8
+        self.largura = BALA_COWBOY_LARGURA
+        self.altura = BALA_COWBOY_ALTURA
 
-        # =========================
-        # BALA DO COWBOY
-        # =========================
+        # configura aparência da bala de acordo com o atirador
         if self.tipo == "cowboy":
 
-            self.cor = (255, 220, 120)
+            self.cor = BALA_COWBOY_COR
 
             self.vertices_locais = [
 
@@ -32,12 +29,10 @@ class Bala:
                 (-3, 0),
             ]
 
-        # =========================
-        # SEMENTE DAS ABÓBORAS
-        # =========================
+        # configura a aparência da semente lançada pelas abóboras
         else:
 
-            self.cor = (230, 240, 200)
+            self.cor = SEMENTE_COR
 
             self.vertices_locais = [
 
@@ -51,10 +46,12 @@ class Bala:
 
     def atualizar(self, dt):
 
+        # move a bala na direção definida
         self.pos += (self.dir * BALA_VELOCIDADE * dt)
 
     def fora_da_tela(self):
 
+        # verifica se a bala saiu dos limites da janela
         return not (
                 0 <= self.pos.x <= LARGURA
                 and
@@ -71,6 +68,8 @@ class Bala:
 
     def _matriz_mundo(self):
 
+        # calcula a rotação necessária para alinhar
+        # o desenho da bala com sua direção de movimento
         angulo = math.degrees(
 
             math.atan2(
@@ -80,6 +79,7 @@ class Bala:
 
         ) + 90
 
+        # cria a transformação final da bala no mundo
         return Transformacoes.matriz_mundo(
 
             self.pos.x,
@@ -89,6 +89,7 @@ class Bala:
 
     def desenhar(self, screen):
 
+        # aplica rotação e translação aos vértices locais
         vertices_mundo = (
             Transformacoes.aplicar_transformacoes(
                 self.vertices_locais,
@@ -96,17 +97,17 @@ class Bala:
             )
         )
 
-        # preenchimento
+        # desenha o corpo da bala
         pygame.draw.polygon(
             screen,
             self.cor,
             vertices_mundo
         )
 
-        # contorno
+        # desenha o contorno para melhorar a visualização
         pygame.draw.polygon(
             screen,
-            (0, 0, 0),
+            COR_PRETO,
             vertices_mundo,
             2
         )

@@ -14,6 +14,7 @@ if __name__ == "__main__":
 
     fonte = pygame.font.SysFont(None, 36)
 
+    # pontuação e estado do jogo
     record = 0
     score = 0
     vidas = 3
@@ -21,13 +22,16 @@ if __name__ == "__main__":
 
     clock = pygame.time.Clock()
 
+    # cria o cowboy no centro da tela
     cowboy = Cowboy(400, 300)
 
-    margem = 40
+    margem = MARGEM
 
-    intervalo_spawn = 1
-    tempo_spawn = 0
+    # controla o tempo entre spawns de inimigos
+    intervalo_spawn = INTERVALO_SPAWN
+    tempo_spawn = TEMPO_SPAWN
 
+    # inimigos iniciais nas bordas da tela
     inimigos = [
 
         # topo
@@ -47,6 +51,7 @@ if __name__ == "__main__":
         Inimigos(LARGURA - margem, ALTURA * 0.50),
     ]
 
+    # shooters nos cantos da tela
     shooters = [
         Shooter(margem, ALTURA * 0.25),
         Shooter(margem, ALTURA * 0.75),
@@ -58,12 +63,16 @@ if __name__ == "__main__":
 
     while rodando:
 
+        # dt para movimento independente de fps
         dt = clock.tick(FPS) / 1000
 
+        # acumula tempo para spawn de novos inimigos
         tempo_spawn += dt
+
         # gera inimigos aleatoriamente a cada 2 segundos
         if tempo_spawn >= intervalo_spawn:
 
+            # sorteia um dos 4 lados da tela
             lado = random.randint(0, 3)
 
             if lado == 0:  # topo
@@ -82,6 +91,7 @@ if __name__ == "__main__":
                 x = LARGURA - margem
                 y = random.randint(margem, ALTURA - margem)
 
+            # adiciona o novo inimigo na lista
             inimigos.append(Inimigos(x, y))
 
             tempo_spawn = 0
@@ -92,24 +102,26 @@ if __name__ == "__main__":
             if evento.type == pygame.QUIT:
                 rodando = False
 
-            # reiniciar
+            # reiniciar jogo ao pressionar R na tela de game over
             if evento.type == pygame.KEYDOWN:
 
                 if game_over and evento.key == pygame.K_r:
+
+                    # reseta pontuação e estado
                     score = 0
                     vidas = 3
                     game_over = False
 
+                    # reseta posição e estado do cowboy
                     cowboy.x = LARGURA / 2
                     cowboy.y = ALTURA / 2
-
                     cowboy.balas.clear()
-
                     cowboy.escala_x = 1
                     cowboy.escala_y = 1
-
                     cowboy.tomou_dano = False
                     cowboy.tempo_dano = 0
+
+                    # recria inimigos nas posições iniciais
                     inimigos = [
 
                         Inimigos(LARGURA * 0.25, margem),
@@ -124,6 +136,7 @@ if __name__ == "__main__":
                         Inimigos(LARGURA - margem, ALTURA * 0.50),
                     ]
 
+                    # recria shooters nos cantos
                     shooters = [
                         Shooter(margem, ALTURA * 0.25),
                         Shooter(margem, ALTURA * 0.75),
@@ -131,21 +144,19 @@ if __name__ == "__main__":
                         Shooter(LARGURA - margem, ALTURA * 0.75),
                     ]
 
-        # desenhar cenario
+        # desenha o fundo e elementos do cenário
         desenhar_cenario(tela)
-
 
         if not game_over:
             teclas = pygame.key.get_pressed()
             cowboy.move(teclas, dt)
 
-            # Lógica de colisões de balas do cowboy
-            # tiros do cowboy
+            # verifica colisão das balas do cowboy com inimigos e shooters
             for bullet in cowboy.balas[:]:
 
                 acertou = False
 
-                # inimigos normais
+                # checa colisão com abóboras normais
                 for enemy in inimigos[:]:
 
                     if Transformacoes.colisao(bullet, enemy):
@@ -154,17 +165,14 @@ if __name__ == "__main__":
                             cowboy.balas.remove(bullet)
 
                         inimigos.remove(enemy)
-
                         score += 10
-
                         acertou = True
-
                         break
 
                 if acertou:
                     continue
 
-                # shooters
+                # checa colisão com shooters roxos
                 for shooter in shooters[:]:
 
                     if Transformacoes.colisao(bullet, shooter):
@@ -173,27 +181,22 @@ if __name__ == "__main__":
                             cowboy.balas.remove(bullet)
 
                         shooters.remove(shooter)
-
                         score += 20
-
                         break
 
-            # =========================
-            # COLISÃO INIMIGOS x COWBOY
-            # =========================
-
+            # verifica colisão de inimigos com o cowboy (só se não tomou dano recentemente)
             if not cowboy.tomou_dano:
 
-                # abóboras normais
+                # abóboras normais encostam no cowboy
                 for enemy in inimigos:
 
                     if Transformacoes.colisao(enemy, cowboy):
 
                         vidas -= 1
 
+                        # aplica efeito de dano
                         cowboy.tomou_dano = True
                         cowboy.tempo_dano = 0
-
                         cowboy.escala_x = 0.5
                         cowboy.escala_y = 0.5
 
@@ -202,7 +205,7 @@ if __name__ == "__main__":
 
                         break
 
-                # shooters roxos
+                # shooters roxos encostam no cowboy
                 for shooter in shooters:
 
                     if Transformacoes.colisao(shooter, cowboy):
@@ -211,7 +214,6 @@ if __name__ == "__main__":
 
                         cowboy.tomou_dano = True
                         cowboy.tempo_dano = 0
-
                         cowboy.escala_x = 0.5
                         cowboy.escala_y = 0.5
 
@@ -220,22 +222,23 @@ if __name__ == "__main__":
 
                         break
 
-            # BALAS DOS SHOOTERS
-            if not cowboy.tomou_dano:
+            # move as abóboras em direção ao cowboy
+            for inimigo in inimigos:
+                inimigo.mover(cowboy.x, cowboy.y, dt)
 
-                for shooter in shooters:
+            # move os shooters, verifica colisão das balas deles com o cowboy
+            for shooter in shooters:
 
+                if not cowboy.tomou_dano:
                     for bullet in shooter.balas[:]:
 
                         if Transformacoes.colisao(bullet, cowboy):
 
                             shooter.balas.remove(bullet)
-
                             vidas -= 1
 
                             cowboy.tomou_dano = True
                             cowboy.tempo_dano = 0
-
                             cowboy.escala_x = 0.5
                             cowboy.escala_y = 0.5
 
@@ -244,31 +247,9 @@ if __name__ == "__main__":
 
                             break
 
-            # Atualiza e desenha Inimigos comuns
-            for inimigo in inimigos:
-                inimigo.mover(cowboy.x, cowboy.y, dt)
-
-            # Atualiza Shooters e suas balas
-            for shooter in shooters:
-                for bullet in shooter.balas[:]:
-
-                    if Transformacoes.colisao(bullet, cowboy):
-
-                        shooter.balas.remove(bullet)
-
-                        vidas -= 1
-
-                        # efeito dano
-                        cowboy.tomou_dano = True
-                        cowboy.tempo_dano = 0
-
-                        cowboy.escala_x = 0.5
-                        cowboy.escala_y = 0.5
-
-                        if vidas <= 0:
-                            game_over = True
                 shooter.mover(cowboy.x, cowboy.y, dt)
 
+        # desenha todos os personagens na tela
         for inimigo in inimigos:
             inimigo.desenhar(tela)
 
@@ -277,7 +258,7 @@ if __name__ == "__main__":
 
         cowboy.desenhar(tela)
 
-
+        # score, vidas e record no canto superior esquerdo
         texto_score = fonte.render(f"Score: {score}", True, COR_BRANCO)
         tela.blit(texto_score, (10, 10))
 
@@ -287,41 +268,42 @@ if __name__ == "__main__":
         texto_record = fonte.render(f"Record: {record}", True, (255, 255, 0))
         tela.blit(texto_record, (10, 80))
 
+        # tela de game over
         if game_over:
 
             # fundo preto
             tela.fill((0, 0, 0))
 
-            # atualiza record
+            # atualiza record se o score atual for maior
             if score > record:
                 record = score
 
-            # fontes
+            # fontes maiores para a tela de game over
             fonte_gameover = pygame.font.SysFont(None, 120)
             fonte_texto = pygame.font.SysFont(None, 40)
 
-            # GAME OVER roxo
+            # título GAME OVER em roxo
             texto_gameover = fonte_gameover.render(
                 "GAME OVER",
                 True,
                 (180, 60, 255)
             )
 
-            # texto reiniciar
+            # instrução para reiniciar
             texto_restart = fonte_texto.render(
                 "Pressione R para reiniciar",
                 True,
                 (255, 255, 255)
             )
 
-            # score final
+            # pontuação final em amarelo
             texto_score_final = fonte_texto.render(
                 f"Score Final: {score}",
                 True,
                 (255, 220, 0)
             )
 
-            # posições
+            # centraliza os textos na tela
             rect_gameover = texto_gameover.get_rect(
                 center=(LARGURA / 2, ALTURA / 2 - 80)
             )
@@ -334,8 +316,10 @@ if __name__ == "__main__":
                 center=(LARGURA / 2, ALTURA / 2 + 70)
             )
 
-            # desenha
+            # desenha os textos na tela
             tela.blit(texto_gameover, rect_gameover)
             tela.blit(texto_restart, rect_restart)
             tela.blit(texto_score_final, rect_score)
+
+        # atualiza a tela
         pygame.display.flip()
