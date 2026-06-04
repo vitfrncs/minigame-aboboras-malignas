@@ -3,7 +3,7 @@ LARGURA, ALTURA = 900, 700
 TITLE = "Cowboy vs Abóboras Malignas"
 FPS = 60
 MARGEM = 40
-INTERVALO_SPAWN = 1  # segundos entre cada spawn de inimigo
+INTERVALO_SPAWN = 3  # segundos entre cada spawn de inimigo
 TEMPO_SPAWN = 0      # contador de tempo do spawn
 
 # Cores do cowboy
@@ -47,13 +47,13 @@ COWBOY_VIDAS = 5
 COWBOY_COOLDOWN = 0.3    # segundos entre cada tiro
 
 # Inimigos
-INIMIGOS_VELOCIDADE = 60
-BALA_INIMIGOS = 200      # velocidade das balas dos shooters
+INIMIGOS_VELOCIDADE = 80
 INIMIGO_LARGURA = 40
 INIMIGO_ALTURA  = 40
 
 # Balas
-BALA_VELOCIDADE = 270    # velocidade das balas do cowboy
+BALA_SHOOTER_VELOCIDADE = 100
+BALA_COWBOY_VELOCIDADE = 200
 
 # Balas do cowboy
 BALA_COWBOY_COR = (255, 220, 120)

@@ -19,6 +19,7 @@ if __name__ == "__main__":
     score = 0
     vidas = 3
     game_over = False
+    game_won = False
 
     clock = pygame.time.Clock()
 
@@ -70,7 +71,7 @@ if __name__ == "__main__":
         tempo_spawn += dt
 
         # gera inimigos aleatoriamente a cada 2 segundos
-        if tempo_spawn >= intervalo_spawn:
+        if tempo_spawn >= intervalo_spawn and game_over == False and game_won == False:
 
             # sorteia um dos 4 lados da tela
             lado = random.randint(0, 3)
@@ -105,12 +106,13 @@ if __name__ == "__main__":
             # reiniciar jogo ao pressionar R na tela de game over
             if evento.type == pygame.KEYDOWN:
 
-                if game_over and evento.key == pygame.K_r:
+                if (game_over or game_won) and evento.key == pygame.K_r:
 
                     # reseta pontuação e estado
                     score = 0
                     vidas = 3
                     game_over = False
+                    game_won = False
 
                     # reseta posição e estado do cowboy
                     cowboy.x = LARGURA / 2
@@ -285,6 +287,60 @@ if __name__ == "__main__":
             # título GAME OVER em roxo
             texto_gameover = fonte_gameover.render(
                 "GAME OVER",
+                True,
+                (255, 0, 0)
+            )
+
+            # instrução para reiniciar
+            texto_restart = fonte_texto.render(
+                "Pressione R para reiniciar",
+                True,
+                (255, 255, 255)
+            )
+
+            # pontuação final em amarelo
+            texto_score_final = fonte_texto.render(
+                f"Score Final: {score}",
+                True,
+                (255, 220, 0)
+            )
+
+            # centraliza os textos na tela
+            rect_gameover = texto_gameover.get_rect(
+                center=(LARGURA / 2, ALTURA / 2 - 80)
+            )
+
+            rect_restart = texto_restart.get_rect(
+                center=(LARGURA / 2, ALTURA / 2 + 20)
+            )
+
+            rect_score = texto_score_final.get_rect(
+                center=(LARGURA / 2, ALTURA / 2 + 70)
+            )
+
+            # desenha os textos na tela
+            tela.blit(texto_gameover, rect_gameover)
+            tela.blit(texto_restart, rect_restart)
+            tela.blit(texto_score_final, rect_score)
+
+        if len(inimigos) == 0 and len(shooters) == 0:
+            game_won = True
+
+        if game_won:
+            # fundo preto
+            tela.fill((0, 0, 0))
+
+            # atualiza record se o score atual for maior
+            if score > record:
+                record = score
+
+            # fontes maiores para a tela de game over
+            fonte_gameover = pygame.font.SysFont(None, 120)
+            fonte_texto = pygame.font.SysFont(None, 40)
+
+            # título GAME OVER em roxo
+            texto_gameover = fonte_gameover.render(
+                "GAME WON",
                 True,
                 (180, 60, 255)
             )

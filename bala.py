@@ -45,9 +45,11 @@ class Bala:
             ]
 
     def atualizar(self, dt):
-
         # move a bala na direção definida
-        self.pos += (self.dir * BALA_VELOCIDADE * dt)
+        if self.tipo == "cowboy":
+            self.pos += (self.dir * BALA_COWBOY_VELOCIDADE * dt)
+        else:
+            self.pos += (self.dir * BALA_SHOOTER_VELOCIDADE * dt)
 
     def fora_da_tela(self):
 
