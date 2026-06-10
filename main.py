@@ -1,8 +1,8 @@
-from cowboy import *
-from inimigos import Inimigos
-from shooter import Shooter
+from entidades.cowboy import *
+from entidades.inimigos import Inimigos
+from entidades.shooter import Shooter
 from transformações import Transformacoes
-from cenario import *
+from ui.cenario import *
 import random
 
 
@@ -13,6 +13,8 @@ if __name__ == "__main__":
     pygame.display.set_caption(TITLE)
 
     fonte = pygame.font.SysFont(None, 36)
+
+    # Configurações iniciais ==============================================
 
     # pontuação e estado do jogo
     record = 0
@@ -31,6 +33,8 @@ if __name__ == "__main__":
     # controla o tempo entre spawns de inimigos
     intervalo_spawn = INTERVALO_SPAWN
     tempo_spawn = TEMPO_SPAWN
+
+    # Inicialização dos inimigos: posição inicial ==========================
 
     # inimigos iniciais nas bordas da tela
     inimigos = [
@@ -60,9 +64,13 @@ if __name__ == "__main__":
         Shooter(LARGURA - margem, ALTURA * 0.75),
     ]
 
+    # Loop principal do jogo ================================
+
     rodando = True
 
     while rodando:
+
+        ''' Spawn de novos inimigos laranjas =================='''
 
         # dt para movimento independente de fps
         dt = clock.tick(FPS) / 1000
@@ -97,7 +105,8 @@ if __name__ == "__main__":
 
             tempo_spawn = 0
 
-        # eventos
+        """ Eventos ================================================"""
+
         for evento in pygame.event.get():
 
             if evento.type == pygame.QUIT:
@@ -151,7 +160,9 @@ if __name__ == "__main__":
 
         if not game_over:
             teclas = pygame.key.get_pressed()
-            cowboy.move(teclas, dt)
+            cowboy.mover(teclas, dt)
+
+            """Colisões =========================================="""
 
             # verifica colisão das balas do cowboy com inimigos e shooters
             for bullet in cowboy.balas[:]:
@@ -224,6 +235,8 @@ if __name__ == "__main__":
 
                         break
 
+            """Tratamento de movimentação ==============="""
+
             # move as abóboras em direção ao cowboy
             for inimigo in inimigos:
                 inimigo.mover(cowboy.x, cowboy.y, dt)
@@ -251,6 +264,8 @@ if __name__ == "__main__":
 
                 shooter.mover(cowboy.x, cowboy.y, dt)
 
+        """Redesenhar entidades de acordo com nova posição =================="""
+
         # desenha todos os personagens na tela
         for inimigo in inimigos:
             inimigo.desenhar(tela)
@@ -259,6 +274,8 @@ if __name__ == "__main__":
             shooter.desenhar(tela)
 
         cowboy.desenhar(tela)
+
+        """ Score, vidas e record ==========================================="""
 
         # score, vidas e record no canto superior esquerdo
         texto_score = fonte.render(f"Score: {score}", True, COR_BRANCO)
@@ -270,7 +287,7 @@ if __name__ == "__main__":
         texto_record = fonte.render(f"Record: {record}", True, (255, 255, 0))
         tela.blit(texto_record, (10, 80))
 
-        # tela de game over
+        """ Tela de game over ==============================================="""
         if game_over:
 
             # fundo preto
@@ -323,8 +340,11 @@ if __name__ == "__main__":
             tela.blit(texto_restart, rect_restart)
             tela.blit(texto_score_final, rect_score)
 
+        # verificar se o jogo foi ganho
         if len(inimigos) == 0 and len(shooters) == 0:
             game_won = True
+
+        """ Tela de game won ==============================================="""
 
         if game_won:
             # fundo preto

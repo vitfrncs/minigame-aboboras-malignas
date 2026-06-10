@@ -1,4 +1,4 @@
-from config import *
+from ui.config import *
 from transformações import Transformacoes
 import pygame
 import math

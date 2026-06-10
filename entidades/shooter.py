@@ -1,6 +1,6 @@
 import pygame
-from config import *
-from bala import Bala
+from ui.config import *
+from entidades.bala import Bala
 from transformações import Transformacoes
 
 

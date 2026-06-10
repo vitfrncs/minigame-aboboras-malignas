@@ -98,6 +98,7 @@ class Transformacoes:
     @staticmethod
     def colisao(obj1, obj2):
         """verifica colisão AABB entre dois objetos"""
+        # boundbox
 
         # pega o fator de escala atual de cada objeto
         escala1x = getattr(obj1, "escala_x", 1)

@@ -1,5 +1,5 @@
-from config import *
-from bala import Bala
+from ui.config import *
+from entidades.bala import Bala
 import pygame
 from transformações import Transformacoes
 
@@ -7,6 +7,7 @@ from transformações import Transformacoes
 class Cowboy:
 
     def __init__(self, x, y):
+        self.balas = None
         self.inicial_x = float(x)
         self.inicial_y = float(y)
         self.reset()
@@ -28,7 +29,7 @@ class Cowboy:
             (  2,  40, 10, 16, (70, 40, 20)),   # perna direita
         ]
 
-    def move(self, keys, dt):
+    def mover(self, keys, dt):
         """Processa o movimento, o stun e o disparo do cowboy a cada frame."""
 
         # conta o tempo de stun e remove o efeito de dano ao fim dele

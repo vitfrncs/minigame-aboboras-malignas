@@ -1,8 +1,8 @@
 import pygame
 
-from desenho import Desenho
+from ui.desenho import Desenho
 from transformações import Transformacoes as T
-from config import *
+from ui.config import *
 
 def _poligono(surface, cor, matriz, vertices, lw=0):
     mundo = T.aplicar_transformacoes(vertices, matriz)

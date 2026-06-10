@@ -1,5 +1,5 @@
 import pygame
-from config import *
+from ui.config import *
 from transformações import Transformacoes
 
 
